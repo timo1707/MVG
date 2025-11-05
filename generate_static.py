@@ -427,3 +427,36 @@ if __name__ == "__main__":
         f.write(html_content)
     
     print("Static site generated successfully in docs/index.html")
+    
+    # Generate raw JSON data for iOS Shortcuts
+    try:
+        import json
+        station_info = MvgApi.station(STATION_NAME)
+        if station_info:
+            station_id = station_info.get("id")
+            api = MvgApi(station_id)
+            all_departures = api.departures(limit=DEPARTURE_LIMIT)
+            
+            # Filter for line 180 in direction Berduxstraße
+            filtered_departures = []
+            for departure in all_departures:
+                if departure.get("line") == LINE_NUMBER and DIRECTION in departure.get("destination", ""):
+                    filtered_departures.append(departure)
+            
+            raw_data = {
+                "station_name": STATION_NAME,
+                "station_id": station_id,
+                "place": station_info.get("place"),
+                "line_number": LINE_NUMBER,
+                "direction": DIRECTION,
+                "departures": filtered_departures,
+                "last_update_timestamp": int(datetime.now().timestamp())
+            }
+            
+            # Write to raw.json
+            with open("docs/raw.json", "w", encoding="utf-8") as f:
+                json.dump(raw_data, f, indent=2, ensure_ascii=False)
+            
+            print("Raw JSON data generated successfully in docs/raw.json")
+    except Exception as e:
+        print(f"Warning: Could not generate raw JSON: {e}")

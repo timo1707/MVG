@@ -92,6 +92,55 @@ def get_departures_data():
         }
 
 
+def get_raw_departures():
+    """
+    Fetch raw departure data from MVG API without formatting.
+    
+    :return: Dictionary with raw API response
+    """
+    try:
+        # Get station information
+        station_info = MvgApi.station(STATION_NAME)
+        if not station_info:
+            return {
+                "error": f"Could not find station '{STATION_NAME}'",
+                "station_name": STATION_NAME
+            }
+        
+        station_id = station_info.get("id")
+        
+        # Initialize MVG API and get departures
+        api = MvgApi(station_id)
+        all_departures = api.departures(limit=DEPARTURE_LIMIT)
+        
+        # Filter for line 180 in direction Berduxstraße
+        filtered_departures = []
+        for departure in all_departures:
+            if departure.get("line") == LINE_NUMBER and DIRECTION in departure.get("destination", ""):
+                filtered_departures.append(departure)
+        
+        return {
+            "station_name": STATION_NAME,
+            "station_id": station_id,
+            "place": station_info.get("place"),
+            "line_number": LINE_NUMBER,
+            "direction": DIRECTION,
+            "departures": filtered_departures,
+            "last_update_timestamp": int(datetime.now().timestamp())
+        }
+    
+    except MvgApiError as e:
+        return {
+            "error": "Failed to retrieve data from MVG API. Please try again later.",
+            "station_name": STATION_NAME
+        }
+    except Exception as e:
+        return {
+            "error": "An unexpected error occurred. Please try again later.",
+            "station_name": STATION_NAME
+        }
+
+
 @app.route('/')
 def index():
     """Render the main page with departure information."""
@@ -103,6 +152,13 @@ def index():
 def api_departures():
     """API endpoint returning departure data as JSON."""
     data = get_departures_data()
+    return jsonify(data)
+
+
+@app.route('/raw')
+def raw_departures():
+    """Raw API endpoint returning unformatted departure data for iOS Shortcuts and automation."""
+    data = get_raw_departures()
     return jsonify(data)
 
 

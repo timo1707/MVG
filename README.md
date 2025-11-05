@@ -62,20 +62,28 @@ Then open your browser and navigate to `http://localhost:5000` to see the web in
 - Color-coded delays (green for on-time, yellow for minor delays, red for major delays)
 - Auto-refresh functionality
 
-#### API Endpoint
+#### API Endpoints
 
-The Flask app also provides a JSON API endpoint:
-```
-GET http://localhost:5000/api/departures
-```
+The Flask app provides multiple JSON API endpoints:
 
-Returns departure data in JSON format.
+1. **Formatted Departures** - Returns formatted data with human-readable times:
+   ```
+   GET http://localhost:5000/api/departures
+   ```
+
+2. **Raw Departures** - Returns unformatted raw API response (perfect for iOS Shortcuts):
+   ```
+   GET http://localhost:5000/raw
+   ```
+   
+   Returns departure data with Unix timestamps and all original fields from the MVG API.
 
 ## GitHub Pages Deployment
 
 The repository automatically deploys a static version of the departure board to GitHub Pages:
 
 - **Live Site**: https://timo1707.github.io/MVG/
+- **Raw JSON Data**: https://timo1707.github.io/MVG/raw.json (for iOS Shortcuts)
 - Updates every 5 minutes via GitHub Actions
 - No server required - pure static HTML
 
