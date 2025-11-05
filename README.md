@@ -51,6 +51,11 @@ Run the Flask web application:
 python app.py
 ```
 
+For development with debug mode enabled:
+```bash
+FLASK_DEBUG=true python app.py
+```
+
 Then open your browser and navigate to `http://localhost:5000` to see the web interface with:
 - Real-time departure information
 - Beautiful, responsive design

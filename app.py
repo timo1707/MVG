@@ -82,12 +82,12 @@ def get_departures_data():
     
     except MvgApiError as e:
         return {
-            "error": f"Failed to retrieve data from MVG API: {e}",
+            "error": "Failed to retrieve data from MVG API. Please try again later.",
             "station_name": STATION_NAME
         }
     except Exception as e:
         return {
-            "error": f"An unexpected error occurred: {e}",
+            "error": "An unexpected error occurred. Please try again later.",
             "station_name": STATION_NAME
         }
 
@@ -107,4 +107,7 @@ def api_departures():
 
 
 if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0', port=5000)
+    import os
+    # Only enable debug mode if explicitly set in environment variable
+    debug_mode = os.environ.get('FLASK_DEBUG', 'False').lower() == 'true'
+    app.run(debug=debug_mode, host='0.0.0.0', port=5000)
