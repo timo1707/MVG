@@ -6,6 +6,11 @@ in direction Berduxstraße using the MVG API.
 """
 
 from mvg import MvgApi
+from mvg.mvgapi import MvgApiError
+
+# Configuration constants
+DEPARTURE_LIMIT = 50  # Maximum number of departures to fetch
+DISPLAY_LIMIT = 10  # Maximum number of departures to display when filtering fails
 
 
 def main():
@@ -15,22 +20,31 @@ def main():
     
     print(f"Checking station ID for: {station_name}")
     
-    # Get the station information
-    station_info = MvgApi.station(station_name)
-    if not station_info:
-        print(f"Could not find station: {station_name}")
+    try:
+        # Get the station information
+        station_info = MvgApi.station(station_name)
+        if not station_info:
+            print(f"Error: Could not find station '{station_name}'")
+            print("Please verify the station name and try again.")
+            return
+        
+        station_id = station_info.get("id")
+        print(f"Station ID for {station_name}: {station_id}")
+        print(f"Place: {station_info.get('place')}")
+        
+        # Initialize the MVG API with the station ID
+        api = MvgApi(station_id)
+        
+        # Get all departures for the station
+        print(f"\nFetching departures from {station_name}...")
+        departures = api.departures(limit=DEPARTURE_LIMIT)
+    except MvgApiError as e:
+        print(f"Error: Failed to retrieve data from MVG API: {e}")
+        print("Please check your internet connection and try again.")
         return
-    
-    station_id = station_info.get("id")
-    print(f"Station ID for {station_name}: {station_id}")
-    print(f"Place: {station_info.get('place')}")
-    
-    # Initialize the MVG API with the station ID
-    api = MvgApi(station_id)
-    
-    # Get all departures for the station
-    print(f"\nFetching departures from {station_name}...")
-    departures = api.departures(limit=50)
+    except Exception as e:
+        print(f"Error: An unexpected error occurred: {e}")
+        return
     
     # Filter for line 180 in direction Berduxstraße
     line_number = "180"
@@ -59,7 +73,7 @@ def main():
     if not found_departures:
         print(f"No departures found for line {line_number} in direction {direction}")
         print("\nAll available departures:")
-        for departure in departures[:10]:  # Show first 10 departures
+        for departure in departures[:DISPLAY_LIMIT]:  # Show first DISPLAY_LIMIT departures
             print(f"Line {departure.get('line')}: {departure.get('destination')} at {departure.get('time')}")
 
 
