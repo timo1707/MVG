@@ -305,22 +305,6 @@ def generate_html_page(station_name, station_id, place, line_number, direction, 
             font-size: 0.9em;
         }}
         
-        .refresh-btn {{
-            background: #667eea;
-            color: white;
-            border: none;
-            padding: 12px 30px;
-            border-radius: 25px;
-            font-size: 1em;
-            cursor: pointer;
-            transition: background 0.3s;
-            margin-top: 20px;
-        }}
-        
-        .refresh-btn:hover {{
-            background: #5568d3;
-        }}
-        
         @media (max-width: 768px) {{
             h1 {{
                 font-size: 1.8em;
@@ -357,9 +341,10 @@ def generate_html_page(station_name, station_id, place, line_number, direction, 
             <div class="last-update">
                 Last updated: {last_update}
                 <br>
-                <button class="refresh-btn" onclick="location.reload()">🔄 Refresh</button>
-                <div style="margin-top: 10px; font-size: 0.85em;">
-                    Page auto-refreshes every 5 minutes
+                <div style="margin-top: 15px; padding: 15px; background: #f8f9fa; border-radius: 10px; font-size: 0.9em; color: #666;">
+                    <strong>ℹ️ About Updates:</strong><br>
+                    This is a static GitHub Pages site. Data is refreshed automatically every 5 minutes by GitHub Actions.<br>
+                    Manually refreshing this page won't fetch new data - please wait for the next automatic update.
                 </div>
             </div>
         </div>
