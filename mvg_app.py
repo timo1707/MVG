@@ -5,12 +5,29 @@ This app checks bus departures from line 180 at Olympiazentrum station
 in direction Berduxstraße using the MVG API.
 """
 
+from datetime import datetime
 from mvg import MvgApi
 from mvg.mvgapi import MvgApiError
 
 # Configuration constants
 DEPARTURE_LIMIT = 50  # Maximum number of departures to fetch
 DISPLAY_LIMIT = 10  # Maximum number of departures to display when filtering fails
+
+
+def format_departure_time(timestamp):
+    """
+    Convert Unix timestamp to human-readable format.
+    
+    :param timestamp: Unix timestamp in seconds
+    :return: Formatted date and time string
+    """
+    if timestamp == "Unknown" or timestamp is None:
+        return "Unknown"
+    try:
+        dt = datetime.fromtimestamp(timestamp)
+        return dt.strftime("%Y-%m-%d %H:%M:%S")
+    except (ValueError, TypeError, OSError):
+        return str(timestamp)
 
 
 def main():
@@ -66,7 +83,7 @@ def main():
             print(f"Line: {line_number}")
             print(f"Type: {transport_type}")
             print(f"Destination: {destination}")
-            print(f"Departure Time: {departure_time}")
+            print(f"Departure Time: {format_departure_time(departure_time)}")
             print(f"Delay: {delay} minutes")
             print("-" * 70)
     
@@ -74,7 +91,7 @@ def main():
         print(f"No departures found for line {line_number} in direction {direction}")
         print("\nAll available departures:")
         for departure in departures[:DISPLAY_LIMIT]:  # Show first DISPLAY_LIMIT departures
-            print(f"Line {departure.get('line')}: {departure.get('destination')} at {departure.get('time')}")
+            print(f"Line {departure.get('line')}: {departure.get('destination')} at {format_departure_time(departure.get('time'))}")
 
 
 if __name__ == "__main__":
