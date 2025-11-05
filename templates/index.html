@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MVG Bus Departures - Olympiazentrum</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        
+        h1 {
+            color: #333;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        
+        .station-info {
+            color: #666;
+            font-size: 1.1em;
+            margin-top: 10px;
+        }
+        
+        .info-badge {
+            display: inline-block;
+            background: #667eea;
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            margin-right: 10px;
+            font-size: 0.9em;
+            margin-top: 10px;
+        }
+        
+        .departures-container {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        
+        .section-title {
+            font-size: 1.8em;
+            color: #333;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 3px solid #667eea;
+        }
+        
+        .departure-card {
+            background: #f8f9fa;
+            border-left: 5px solid #667eea;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 15px;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        
+        .departure-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        .departure-card.cancelled {
+            opacity: 0.6;
+            border-left-color: #dc3545;
+        }
+        
+        .departure-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .line-badge {
+            background: #667eea;
+            color: white;
+            padding: 8px 20px;
+            border-radius: 25px;
+            font-weight: bold;
+            font-size: 1.2em;
+        }
+        
+        .time-display {
+            font-size: 1.4em;
+            font-weight: bold;
+            color: #333;
+        }
+        
+        .departure-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+        
+        .detail-item {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .detail-label {
+            color: #666;
+            font-size: 0.9em;
+            margin-bottom: 5px;
+        }
+        
+        .detail-value {
+            color: #333;
+            font-weight: 500;
+            font-size: 1.1em;
+        }
+        
+        .delay-badge {
+            display: inline-block;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 0.9em;
+        }
+        
+        .delay-none {
+            background: #28a745;
+            color: white;
+        }
+        
+        .delay-warning {
+            background: #ffc107;
+            color: #333;
+        }
+        
+        .delay-danger {
+            background: #dc3545;
+            color: white;
+        }
+        
+        .error-message {
+            background: #fff3cd;
+            border: 1px solid #ffc107;
+            border-radius: 10px;
+            padding: 20px;
+            color: #856404;
+            margin-top: 20px;
+        }
+        
+        .no-departures {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+            font-size: 1.2em;
+        }
+        
+        .last-update {
+            text-align: center;
+            color: #666;
+            margin-top: 20px;
+            font-size: 0.9em;
+        }
+        
+        .refresh-btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 25px;
+            font-size: 1em;
+            cursor: pointer;
+            transition: background 0.3s;
+            margin-top: 20px;
+        }
+        
+        .refresh-btn:hover {
+            background: #5568d3;
+        }
+        
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 1.8em;
+            }
+            
+            .departure-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚌 MVG Bus Departures</h1>
+            <div class="station-info">
+                <strong>Station:</strong> {{ data.station_name }}
+                {% if data.place %}
+                , {{ data.place }}
+                {% endif %}
+            </div>
+            {% if data.station_id %}
+            <div class="station-info">
+                <strong>Station ID:</strong> {{ data.station_id }}
+            </div>
+            {% endif %}
+            {% if data.line_number %}
+            <div>
+                <span class="info-badge">Line {{ data.line_number }}</span>
+                <span class="info-badge">→ {{ data.direction }}</span>
+            </div>
+            {% endif %}
+        </div>
+        
+        <div class="departures-container">
+            {% if data.error %}
+                <div class="error-message">
+                    <strong>⚠️ Error:</strong> {{ data.error }}
+                </div>
+            {% elif data.departures %}
+                <h2 class="section-title">Upcoming Departures</h2>
+                {% for departure in data.departures %}
+                <div class="departure-card {% if departure.cancelled %}cancelled{% endif %}">
+                    <div class="departure-header">
+                        <span class="line-badge">Line {{ departure.line }}</span>
+                        <span class="time-display">{{ departure.time }}</span>
+                    </div>
+                    <div class="departure-details">
+                        <div class="detail-item">
+                            <span class="detail-label">Destination</span>
+                            <span class="detail-value">{{ departure.destination }}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Type</span>
+                            <span class="detail-value">{{ departure.type }}</span>
+                        </div>
+                        {% if departure.platform %}
+                        <div class="detail-item">
+                            <span class="detail-label">Platform</span>
+                            <span class="detail-value">{{ departure.platform }}</span>
+                        </div>
+                        {% endif %}
+                        <div class="detail-item">
+                            <span class="detail-label">Delay</span>
+                            <span class="detail-value">
+                                {% if departure.delay == 0 %}
+                                    <span class="delay-badge delay-none">On Time</span>
+                                {% elif departure.delay <= 3 %}
+                                    <span class="delay-badge delay-warning">+{{ departure.delay }} min</span>
+                                {% else %}
+                                    <span class="delay-badge delay-danger">+{{ departure.delay }} min</span>
+                                {% endif %}
+                            </span>
+                        </div>
+                    </div>
+                    {% if departure.cancelled %}
+                    <div style="margin-top: 10px; color: #dc3545; font-weight: bold;">
+                        ❌ This departure has been cancelled
+                    </div>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="no-departures">
+                    <p>No departures found for Line {{ data.line_number }} to {{ data.direction }}</p>
+                </div>
+            {% endif %}
+            
+            {% if data.last_update %}
+            <div class="last-update">
+                Last updated: {{ data.last_update }}
+                <br>
+                <button class="refresh-btn" onclick="location.reload()">🔄 Refresh</button>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</body>
+</html>
